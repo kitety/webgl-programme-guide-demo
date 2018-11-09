@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DrawingRectangle</title>
+</head>
+<body onload="main()">
+  <canvas id="example" width="400" height="400">当前版本浏览器不支持canvas,请更新浏览器</canvas>
+</body>
+<script>
+    function main(){
+        var canvas=document.getElementById('example');
+        if (!canvas) {
+            console.log('没有找到canvas元素');
+            return
+        }
+        var ctx=canvas.getContext('2d');
+        ctx.fillStyle="rgba(0,0,255,1.0)";
+        ctx.fillRect(120,10,150,150);
+    }
+</script>
+</html>
