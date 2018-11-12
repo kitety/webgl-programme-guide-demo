@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HelloPoint-3</title>
+</head>
+
+<body onload="main()">
+    <!-- 
+        将点的信息从JS传入webgl
+        attribute变量=>与顶点相关的数据=>顶点着色器
+        uniform变量=>对于那些所有顶点都相同(或与顶点无关)的数据
+     -->
+    <canvas id="webgl" width="600" height="400" style="border:1px solid red">当前版本浏览器不支持canvas,请更新浏览器</canvas>
+</body>
+<script src="../lib/lib_all.js"></script>
+<script>
+// 顶点着色器
+var VSHADER_SOURCE =
+    'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
+    'void main(){\n' +
+    'gl_Position=a_Position;\n' +
+    'gl_PointSize=10.0;\n' +
+    '}\n';
+// 片元着色器
+var FSHADER_SOURCE =
+    'void main(){\n' +
+    'gl_FragColor=vec4(0.0,1.0,0.0,1.0);\n' +
+    '}\n'
+
+function main() {
+    // 获取canvas元素
+    var canvas = document.getElementById('webgl');
+    // 获取webgl上下文
+    var gl = getWebGLContext(canvas);
+    // 初始化着色器
+    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        return
+    }
+    //获取attribute变量的储存位置
+    var a_Position = gl.getAttribLocation(gl.program, 'a_Position'); //获取变量的储存地址,返回值就是地址
+    if (a_Position < 0) {
+        return
+    }
+    canvas.onmousedown = function() {
+        click(ev, gl, canvas, a_Position);
+    }
+    var g_points = [];
+    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+    function click(ev, gl, canvas, a_Position) {
+        var x = ev.clientX; //x坐标
+        var y = ev.clientY;
+        var rect = ev.target.getBoundingClientRect();
+        x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
+        y = ((canvas.height / 2) - (y - rect.top)) / (canvas.height / 2);
+        g_points.push({ 'x': x, 'y': y })
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        var len = g_points.length;
+        for (var i = 0; i < len; i++) {
+            gl.vertexAttrib3f(a_Position, g_points[i].x, g_points[i].y, 0.0); // 省略第四个参数,默认1.0
+            gl.drawArrays(gl.POINTS, 0, 1)
+
+        }
+    }
+}
+</script>
+
+</html>

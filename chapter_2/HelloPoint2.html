@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HelloPoint-2</title>
+</head>
+
+<body onload="main()">
+    <!-- 
+        将点的信息从JS传入webgl
+        attribute变量=>与顶点相关的数据=>顶点着色器
+        uniform变量=>对于那些所有顶点都相同(或与顶点无关)的数据
+     -->
+    <canvas id="webgl" width="400" height="400">当前版本浏览器不支持canvas,请更新浏览器</canvas>
+</body>
+<script src="../lib/lib_all.js"></script>
+<script>
+// 顶点着色器
+var VSHADER_SOURCE =
+    'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
+    'attribute float a_PointSize;\n' + // attribute 儲存限定符 類型 vec4
+    'void main(){\n' +
+    'gl_Position=a_Position;\n' +
+    'gl_PointSize=a_PointSize;\n' +
+    '}\n';
+// 片元着色器
+var FSHADER_SOURCE =
+    'void main(){\n' +
+    'gl_FragColor=vec4(0.0,1.0,0.0,1.0);\n' +
+    '}\n'
+
+function main() {
+    // 获取canvas元素
+    var canvas = document.getElementById('webgl');
+    // 获取webgl上下文
+    var gl = getWebGLContext(canvas);
+    // 初始化着色器
+    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        return
+    }
+    //获取attribute变量的储存位置
+    var a_Position = gl.getAttribLocation(gl.program, 'a_Position'); //获取变量的储存地址,返回值就是地址
+    var a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize'); //获取变量的储存地址,返回值就是地址
+    if (a_Position < 0) {
+        return
+    }
+    // 将顶点位置传输给attribute
+    // gl.vertexAttrib3f(a_Position, 0.5, 0.0, 0.0);// 省略第四个参数,默认1.0
+    gl.vertexAttrib1f(a_Position, 0.5);// 省略第四个参数,默认1.0
+    gl.vertexAttrib1f(a_PointSize, 5.0);// 
+    // 设置canvas背景色
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    // 清楚canvas
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    // 绘制点
+    gl.drawArrays(gl.POINTS, 0, 1)
+}
+</script>
+
+</html>
