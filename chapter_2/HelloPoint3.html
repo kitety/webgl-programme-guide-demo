@@ -45,7 +45,7 @@ function main() {
     if (a_Position < 0) {
         return
     }
-    canvas.onmousedown = function() {
+    canvas.onmousedown = function(ev) {
         click(ev, gl, canvas, a_Position);
     }
     var g_points = [];
