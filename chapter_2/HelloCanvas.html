@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DrawingRectangle</title>
+</head>
+
+<body onload="main()">
+    <canvas id="webgl" width="400" height="400">当前版本浏览器不支持canvas,请更新浏览器</canvas>
+</body>
+<script src="../lib/lib_all.js"></script>
+<script>
+    function main() {
+        // 获取元素
+        var canvas = document.getElementById('webgl');
+        if (!canvas) {
+            console.log('没有找到canvas元素');
+            return
+        }
+        // 获取webgl绘图上下文
+        // var gl = canvas.getContext('webgl')
+        var gl = getWebGLContext(canvas)
+        // 指定清空canvas的颜色=>指定绘图区域的背景色
+        //下一次用之前没有没有必要用,除非你想换颜色
+        //存储在WEBGL系统
+        gl.clearColor(0.0,0.0,1.0,1.0);
+        // 清空canvas
+        // 用之前指定的背景色清空,即:用背景色填充,擦除已经绘制的内容
+        // clear() 比二维图形上下文复杂=>清空颜色缓冲区
+        // 参数是一个buffer，对应颜色，深度，模板缓冲区
+        gl.clear(gl.COLOR_BUFFER_BIT)
+    }
+</script>
+
+</html>
