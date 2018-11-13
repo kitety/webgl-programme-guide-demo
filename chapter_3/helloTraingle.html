@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>三角形</title>
+</head>
+
+<body onload="main()">
+    <!-- 
+        将点的信息从JS传入webgl
+        attribute变量=>与顶点相关的数据=>顶点着色器
+        uniform变量=>对于那些所有顶点都相同(或与顶点无关)的数据
+     -->
+    <canvas id="webgl" width="600" height="400" style="border:1px solid red">当前版本浏览器不支持canvas,请更新浏览器</canvas>
+</body>
+<script src="../lib/lib_all.js"></script>
+<script>
+    // 顶点着色器
+    var VSHADER_SOURCE =
+        'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
+        'void main(){\n' +
+        'gl_Position=a_Position;\n' +
+        'gl_PointSize=10.0;\n' +
+        '}\n';
+    // 片元着色器
+    var FSHADER_SOURCE =
+        'void main(){\n' +
+        'gl_FragColor=vec4(0.0,1.0,0.0,1.0);\n' +
+        '}\n'
+
+    function main() {
+        // 获取canvas元素
+        var canvas = document.getElementById('webgl');
+        // 获取webgl上下文
+        var gl = getWebGLContext(canvas);
+        // 初始化着色器
+        if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+            return
+        }
+        // 设置顶点位置
+        var n = initVertexBuffer(gl);
+        if (n < 0) {
+            return
+        }
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        // 绘制三个点
+        gl.drawArrays(gl.LINE_LOOP, 0, n); // n  is 3
+
+        function initVertexBuffer(gl) {
+            var vertices = new Float32Array([
+                0.0, 0.5, -0.5, -0.5, 0.5, -0.5
+            ]);
+            var n = 3;
+            // 1.创建缓冲区对象
+            var vertexBuffer = gl.createBuffer();
+            if (!vertexBuffer) {
+                return -1;
+            }
+            // 2.将缓冲区对象绑定到目标
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            // 3.向缓冲区对象中写入数据
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            //获取attribute变量的储存位置
+            var a_Position = gl.getAttribLocation(gl.program, 'a_Position'); //获取变量的储存地址,返回值就是地址
+            if (a_Position < 0) {
+                return
+            }
+            // 4.将缓冲区对象分配给a_Position变量(实际上是缓冲区对象的引用或指针)
+            gl.vertexAttribPointer(a_Position,2,gl.FLOAT,false,0,0);
+            // 5.连接a_Position变量与分配给他的缓冲区对象
+            gl.enableVertexAttribArray(a_Position);
+            return n
+        }
+    }
+</script>
+
+</html>
