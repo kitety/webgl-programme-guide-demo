@@ -56,9 +56,9 @@ function main() {
     function click(ev, gl, canvas, a_Position) {
         var x = ev.clientX; //x坐标
         var y = ev.clientY;
-        var rect = ev.target.getBoundingClientRect();
-        x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
-        y = ((canvas.height / 2) - (y - rect.top)) / (canvas.height / 2);
+        var rect = ev.target.getBoundingClientRect(); //dom元素的矩形对象
+        x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2); // 转换为WEBGL的坐标
+        y = ((canvas.height / 2) - (y - rect.top)) / (canvas.height / 2); // 转换为WEBGL的坐标
         g_points.push({ 'x': x, 'y': y })
         gl.clear(gl.COLOR_BUFFER_BIT);
         var len = g_points.length;
