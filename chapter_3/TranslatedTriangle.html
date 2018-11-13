@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>三角形</title>
+    <title>TranslatedTriangle</title>
 </head>
 
 <body onload="main()">
@@ -21,9 +21,9 @@
     // 顶点着色器
     var VSHADER_SOURCE =
         'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
+        'uniform vec4 u_Translation;\n' + // attribute 儲存限定符 類型 vec4
         'void main(){\n' +
-        'gl_Position=a_Position;\n' +
-        'gl_PointSize=10.0;\n' +
+        'gl_Position=u_Translation+a_Position;\n' +
         '}\n';
     // 片元着色器
     var FSHADER_SOURCE =
@@ -45,19 +45,25 @@
         if (n < 0) {
             return
         }
+        var Tx=0.5,Ty=0.5,Tz=0.5;
+        var u_Translation=gl.getUniformLocation(gl.program,'u_Translation')
+        gl.uniform4f(u_Translation,Tx,Ty,Tz,0.0) //最后一项要是0.0,因为a_Position那里已经是1.0了
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        // 绘制矩形
-        // gl.drawArrays(gl.TRIANGLE_FAN, 0, n); // n  is 3
-        //矩形 绘制的时候是逆时针绘制的
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // n  is 3
+        // 三角形
+        gl.drawArrays(gl.TRIANGLES, 0, n); // n  is 3
+        /* 每次执行都会进行一下三步:
+            1.将顶点坐标传给a_Position
+            2.向a_Position加上u_Translation
+            3.结果赋值给gl_Position
+         */
 
         function initVertexBuffer(gl) {
             // 数组的顺序也是有关系的
             var vertices = new Float32Array([
-               -0.5,0.5,-0.5,-0.5,0.5,0.5,0.5,-0.5
+               0.0,0.0,-0.5,-0.5,0.5,-0.5
             ]);
-            var n = 4;
+            var n = 3;
             // 1.创建缓冲区对象
             var vertexBuffer = gl.createBuffer();
             if (!vertexBuffer) {
