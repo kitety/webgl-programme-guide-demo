@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>RotateTriangle_Matrix</title>
+</head>
+
+<body onload="main()">
+    <!-- 
+        将点的信息从JS传入webgl
+        attribute变量=>与顶点相关的数据=>顶点着色器
+        uniform变量=>对于那些所有顶点都相同(或与顶点无关)的数据
+     -->
+    <canvas id="webgl" width="600" height="400" style="border:1px solid red">当前版本浏览器不支持canvas,请更新浏览器</canvas>
+</body>
+<script src="../lib/lib_all.js"></script>
+<script>
+    // 顶点着色器
+    var VSHADER_SOURCE =
+        // 一定要把分号写好
+        // 没有涉及到的变量有 vertexAttribPointer 设置
+        'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
+        // mat4 4*4 矩阵
+        'uniform mat4 u_xforMatrix;\n' + // 传入三角函数值
+        'void main(){\n' +
+        '    gl_Position = u_xforMatrix * a_Position;\n' +
+        '}\n';
+    // 片元着色器
+    var FSHADER_SOURCE =
+        'void main(){\n' +
+        '    gl_FragColor = vec4(0.0,1.0,0.0,1.0);\n' +
+        '}\n'
+    // 旋转角度90度
+    var ANGLE = 90.0;
+    var Tx=0.5,Ty=0.5,Tz=0.0;
+    function main() {
+        // 获取canvas元素
+        var canvas = document.getElementById('webgl');
+        // 获取webgl上下文
+        var gl = getWebGLContext(canvas);
+        // 初始化着色器
+        if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+            return
+        }
+        // 设置顶点位置
+        var n = initVertexBuffer(gl);
+        if (n < 0) {
+            return
+        }
+        var radian = Math.PI * ANGLE / 180.0; // 转换为弧度制
+        var cosB = Math.cos(radian);
+        var sinB = Math.sin(radian);
+        //  注意WEBGL中矩阵是列主序的
+        /* 按照两种方式在数组中存储矩阵元素:按行主序和按列主序 */
+        var xforMatrix = new Float32Array([
+            cosB, sinB, 0.0, 0.0,
+            -sinB, cosB, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            Tx, Ty, Tz, 1.0
+        ])
+        var u_xforMatrix = gl.getUniformLocation(gl.program, 'u_xforMatrix');
+        if (u_xforMatrix < 0) {
+            return
+        }
+        // 将旋转矩阵传输给顶点着色器
+        // 第二项要为false 英文WEBGL没有转置矩阵
+        gl.uniformMatrix4fv(u_xforMatrix, false, xforMatrix)
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        // 三角形
+        gl.drawArrays(gl.TRIANGLES, 0, n); // n  is 3
+        /* 每次执行都会进行一下三步:
+            1.将顶点坐标传给a_Position
+            2.向a_Position加上u_Translation
+            3.结果赋值给gl_Position
+         */
+
+        function initVertexBuffer(gl) {
+            // 数组的顺序也是有关系的
+            var vertices = new Float32Array([
+                0.0, 0.5, -0.5, -0.5, 0.5, -0.5
+            ]);
+            var n = 3;
+            // 1.创建缓冲区对象
+            var vertexBuffer = gl.createBuffer();
+            if (!vertexBuffer) {
+                return -1;
+            }
+            // 2.将缓冲区对象绑定到目标
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            // 3.向缓冲区对象中写入数据
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            //获取attribute变量的储存位置
+            var a_Position = gl.getAttribLocation(gl.program, 'a_Position'); //获取变量的储存地址,返回值就是地址
+            if (a_Position < 0) {
+                return
+            }
+            // 4.将缓冲区对象分配给a_Position变量(实际上是缓冲区对象的引用或指针)
+            gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+            // 5.连接a_Position变量与分配给他的缓冲区对象
+            gl.enableVertexAttribArray(a_Position);
+            return n
+        }
+    }
+</script>
+
+</html>
