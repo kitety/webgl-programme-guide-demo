@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>RotateTriangle_Matrix4</title>
+    <title>RotateTriangle</title>
 </head>
 
 <body onload="main()">
@@ -20,20 +20,23 @@
 <script>
     // 顶点着色器
     var VSHADER_SOURCE =
+        // x'=xcosb-ysinb
+        // y'=xsinb+ycosb
+        // z'=z
         // 一定要把分号写好
         // 没有涉及到的变量有 vertexAttribPointer 设置
         'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
-        // mat4 4*4 矩阵
         'uniform mat4 u_ModelMatrix;\n' + // 传入三角函数值
         'void main(){\n' +
-        '    gl_Position = u_ModelMatrix * a_Position;\n' +
+        'gl_Position = u_ModelMatrix * a_Position;\n' +
         '}\n';
     // 片元着色器
     var FSHADER_SOURCE =
         'void main(){\n' +
-        '    gl_FragColor = vec4(0.0,1.0,0.0,1.0);\n' +
+        'gl_FragColor=vec4(0.0,1.0,0.0,1.0);\n' +
         '}\n'
     // 旋转角度90度
+    var ANGLE_STEP = 45.0;
     function main() {
         // 获取canvas元素
         var canvas = document.getElementById('webgl');
@@ -48,44 +51,32 @@
         if (n < 0) {
             return
         }
-        var radian = Math.PI * ANGLE / 180.0; // 转换为弧度制
-        var cosB = Math.cos(radian);
-        var sinB = Math.sin(radian);
-        // 为旋转矩阵创建Matrix4对象
-        var ModelMatrix = new Matrix4();
-        //计算模型矩阵
-        var ANGLE = 45.0; // 旋转角
-        var Tx = 0.5 // 平移距离
-        // 第一个参数直接旋转角度
-        ModelMatrix.setRotate(ANGLE, 0, 0, 1);
-        // 平移
-        ModelMatrix.translate(Tx,0,0);
-
-        // ModelMatrix.setTranslate(Tx,0,0);
-        // ModelMatrix.rotate(ANGLE, 0, 0, 1);
-        // 平移
-
-        var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-        if (u_ModelMatrix < 0) {
-            return
-        }
-        // 将旋转矩阵传输给顶点着色器
-        // 第二项要为false 英文WEBGL没有转置矩阵
-        gl.uniformMatrix4fv(u_ModelMatrix, false, ModelMatrix.elements)
+        // 设置背景色
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        // 三角形
-        gl.drawArrays(gl.TRIANGLES, 0, n); // n  is 3
-        /* 每次执行都会进行一下三步:
-            1.将顶点坐标传给a_Position
-            2.向a_Position加上u_Translation
-            3.结果赋值给gl_Position
-         */
+        var u_modelMatrix = gl.getUniformLocation(gl.programe, 'u_ModelMatrix');
+        var currentAngle = 0.0;
+        var modelMatrix = new Matrix4();
 
+        var tick = function () {
+            currentAngle = animate(currentAngle);// 更新旋转角
+            draw(gl, n, currentAngle, modelMatrix, u_modelMatrix);
+            requestAnimationFrame(tick);
+            tick()
+        }
+        
+        function draw(gl, n, currentAngle, modelMatrix, u_modelMatrix){
+            // 设置旋转矩阵
+            modelMatrix.setRotate(currentAngle,0,0,1);
+            // 将旋转矩阵传输给顶点着色器
+            gl.uniformMatrix4fv(u_modelMatrix,false,modelMatrix.elements);
+            // 清楚canvas
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.POINTS,0,N)
+        }
         function initVertexBuffer(gl) {
             // 数组的顺序也是有关系的
             var vertices = new Float32Array([
-                0.0, 0.25, -0.25, -0.25, 0.25, -0.25
+                0.0, 0.5, -0.5, -0.5, 0.5, -0.5
             ]);
             var n = 3;
             // 1.创建缓冲区对象
