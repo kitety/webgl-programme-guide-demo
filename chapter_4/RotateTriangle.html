@@ -20,20 +20,17 @@
 <script>
     // 顶点着色器
     var VSHADER_SOURCE =
-        // x'=xcosb-ysinb
-        // y'=xsinb+ycosb
-        // z'=z
         // 一定要把分号写好
         // 没有涉及到的变量有 vertexAttribPointer 设置
         'attribute vec4 a_Position;\n' + // attribute 儲存限定符 類型 vec4
         'uniform mat4 u_ModelMatrix;\n' + // 传入三角函数值
         'void main(){\n' +
-        'gl_Position = u_ModelMatrix * a_Position;\n' +
+        '    gl_Position = u_ModelMatrix * a_Position;\n' +
         '}\n';
     // 片元着色器
     var FSHADER_SOURCE =
         'void main(){\n' +
-        'gl_FragColor=vec4(0.0,1.0,0.0,1.0);\n' +
+        '    gl_FragColor=vec4(0.0,1.0,0.0,1.0);\n' +
         '}\n'
     // 旋转角度90度
     var ANGLE_STEP = 45.0;
@@ -53,25 +50,37 @@
         }
         // 设置背景色
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        var u_modelMatrix = gl.getUniformLocation(gl.programe, 'u_ModelMatrix');
+        var u_modelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
         var currentAngle = 0.0;
         var modelMatrix = new Matrix4();
 
-        var tick = function () {
+        var g_last = Date.now();
+        function animate(angle) {
+            // 计算距离上次调用经过多长时间
+            var now = Date.now();
+            //毫秒
+            var elapsed = now - g_last;
+            g_last = now;
+            // 根据距离上次调用的时间，更新当前的旋转角度
+            var newAngle = angle + (ANGLE_STEP * ANGLE_STEP) / 1000
+            return newAngle %= 360
+
+        }
+        tick()
+        function tick() {
             currentAngle = animate(currentAngle);// 更新旋转角
             draw(gl, n, currentAngle, modelMatrix, u_modelMatrix);
             requestAnimationFrame(tick);
-            tick()
         }
-        
-        function draw(gl, n, currentAngle, modelMatrix, u_modelMatrix){
+
+        function draw(gl, n, currentAngle, modelMatrix, u_modelMatrix) {
             // 设置旋转矩阵
-            modelMatrix.setRotate(currentAngle,0,0,1);
+            modelMatrix.setRotate(currentAngle, 0, 0, 1);
             // 将旋转矩阵传输给顶点着色器
-            gl.uniformMatrix4fv(u_modelMatrix,false,modelMatrix.elements);
+            gl.uniformMatrix4fv(u_modelMatrix, false, modelMatrix.elements);
             // 清楚canvas
             gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.drawArrays(gl.POINTS,0,N)
+            gl.drawArrays(gl.TRIANGLES, 0, n)
         }
         function initVertexBuffer(gl) {
             // 数组的顺序也是有关系的
