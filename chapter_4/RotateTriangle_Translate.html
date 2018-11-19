@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>RotateTriangle</title>
+    <title>RotateTriangle_Translate</title>
 </head>
 
 <body onload="main()">
@@ -71,6 +71,7 @@
         function draw(gl, n, currentAngle, modelMatrix, u_modelMatrix) {
             // 设置旋转矩阵
             modelMatrix.setRotate(currentAngle, 0, 0, 1);
+            modelMatrix.translate(0.35, 0, 0);
             // 将旋转矩阵传输给顶点着色器
             gl.uniformMatrix4fv(u_modelMatrix, false, modelMatrix.elements);
             // 清楚canvas
